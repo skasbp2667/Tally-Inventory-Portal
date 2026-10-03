@@ -3,7 +3,7 @@ package com.tallyinventory.portal;
 import android.app.*;import android.os.*;import android.content.*;import android.graphics.Color;import android.view.*;import android.widget.*;import org.json.*;import java.io.*;import java.net.*;import java.util.concurrent.*;
 
 public class MainActivity extends Activity {
- final String BASE="https://tally-api-prod-production.up.railway.app"; ExecutorService ex=Executors.newSingleThreadExecutor(); android.content.SharedPreferences sp; LinearLayout root; EditText user,pass; TextView status; String token="";
+ final String BASE="https://tally-api-prod-production.up.railway.app"; // production API ExecutorService ex=Executors.newSingleThreadExecutor(); android.content.SharedPreferences sp; LinearLayout root; EditText user,pass; TextView status; String token="";
  public void onCreate(Bundle b){super.onCreate(b);sp=getSharedPreferences("cache",0);showLogin();}
  TextView tv(String s){TextView t=new TextView(this);t.setText(s);t.setTextSize(16);t.setPadding(24,18,24,18);return t;}
  void base(){root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(24,24,24,24);setContentView(root);}
