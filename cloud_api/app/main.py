@@ -46,29 +46,29 @@ def register(b:Register):
     return {"status":"PENDING_APPROVAL"}
 
 @app.get("/api/stock")
-def stock(h:str=Header(None)):
+def stock(h:str=Header(None,alias="Authorization")):
     need(h,"stock");return {"status":"LIVE" if STATUS["online"] else "CACHED","items":STOCK_CACHE,"last_sync":STATUS["last_seen"]}
 
 @app.get("/api/ledgers")
-def ledgers(h:str=Header(None)):
+def ledgers(h:str=Header(None,alias="Authorization")):
     need(h,"ledgers");return {"status":"LIVE" if STATUS["online"] else "CACHED","items":LEDGER_CACHE,"last_sync":STATUS["last_seen"]}
 
 @app.get("/api/documents")
-def documents(h:str=Header(None)):
+def documents(h:str=Header(None,alias="Authorization")):
     need(h,"documents");return {"items":DOCUMENT_CACHE}
 
 @app.get("/admin/users")
-def users(h:str=Header(None)):
+def users(h:str=Header(None,alias="Authorization")):
     need(h,"users");return [{"username":k,"approved":v["approved"],"permissions":v["permissions"]} for k,v in USERS.items()]
 
 @app.post("/admin/users/{name}/approve")
-def approve(name:str,h:str=Header(None)):
+def approve(name:str,h:str=Header(None,alias="Authorization")):
     need(h,"users")
     if name not in USERS:raise HTTPException(404,"User not found")
     USERS[name]["approved"]=True;return {"status":"APPROVED","username":name}
 
 @app.post("/admin/users/{name}/permissions")
-def perms(name:str,b:dict,h:str=Header(None)):
+def perms(name:str,b:dict,h:str=Header(None,alias="Authorization")):
     need(h,"users")
     if name not in USERS:raise HTTPException(404,"User not found")
     allowed={"stock","ledgers","multi_ledger","documents"}
@@ -76,7 +76,7 @@ def perms(name:str,b:dict,h:str=Header(None)):
     return {"username":name,"permissions":USERS[name]["permissions"]}
 
 @app.post("/connector/sync")
-def sync(b:Sync,x_connector_secret:str=Header(None)):
+def sync(b:Sync,x_connector_secret:str=Header(None,alias="X-Connector-Secret")):
     if CONNECTOR_SECRET=="CHANGE_ME" or x_connector_secret!=CONNECTOR_SECRET:raise HTTPException(401,"Invalid connector secret")
     global STOCK_CACHE,LEDGER_CACHE,DOCUMENT_CACHE
     STOCK_CACHE=[{"name":x.get("name",""),"code":x.get("code",""),"quantity":x.get("quantity",x.get("qty",0)),"unit":x.get("unit","")} for x in b.stock if isinstance(x,dict) and x.get("name")]
@@ -85,7 +85,7 @@ def sync(b:Sync,x_connector_secret:str=Header(None)):
     return {"status":"OK","stock":len(STOCK_CACHE),"ledgers":len(LEDGER_CACHE)}
 
 @app.get("/admin/connector-status")
-def connector(h:str=Header(None)):need(h,"users");return STATUS
+def connector(h:str=Header(None,alias="Authorization")):need(h,"users");return STATUS
 
 @app.get("/app",response_class=HTMLResponse)
 def app_ui():
